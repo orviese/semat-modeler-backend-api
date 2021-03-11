@@ -11,13 +11,16 @@ const accountRoutes = require('./routes/account_routes');
 
 const server = express();
 
-const corsOptions = { credentials: true }
+const corsOptions = {
+    origin: process.env.ALLOWED_ORIGIN,
+    credentials: true }
 server.use(cors(corsOptions));
 server.use(express.json());
-server.use(express.urlencoded({extended: false }));
+server.use(cookieParser());
+server.use(express.urlencoded({extended: true }));
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(express.static(path.join(__dirname, 'public')));
-server.use(cookieParser());
+
 
 
 /*routes here*/

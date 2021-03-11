@@ -21,10 +21,12 @@ router.post('/signin',
     ],
     accountControl.signIn);
 
+router.post('/signout', accountControl.signOut);
+
 router.patch('/', [
         auth,
         body('id', 'Invalid id').not().isEmpty(),
-        body('name', 'A name is necessary to identify you').not().isEmpty(),
+        body('name', 'Name is necessary to identify you').not().isEmpty(),
         body('email', 'Email is required for your account').isEmail()
     ],
     accountControl.updateAccount);
