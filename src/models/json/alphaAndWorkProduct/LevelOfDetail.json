@@ -1,0 +1,12 @@
+{
+  "languageElement": "",
+  "description": "",
+  "isSufficient": "true | false",
+  "name": "",
+  "checkListItem": ["checkpoint ids"],
+  "successor": "Level of detail id 0..1",
+  "invariant": [
+    "All checkpoints of a level of detail must have different names",
+    "A level of detail may not be its own direct or indirect successor"
+  ]
+}

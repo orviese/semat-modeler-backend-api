@@ -1,0 +1,6 @@
+{
+  "abstractActivity": "",
+  "requiredCompetencyLevel": ["competency level ids *"],
+  "actions": ["action ids 0..*"],
+  "approach": ["approach ids 1..*"]
+}

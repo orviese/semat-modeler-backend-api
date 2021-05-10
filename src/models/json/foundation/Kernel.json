@@ -1,0 +1,10 @@
+{
+  "elementGroup": "",
+  "consistencyRules": "",
+  "invariant": [
+    "A kernel can only contain alphas, alpha associations, alpha containments, activity spaces, competencies, kernels, extension elements, and merge resolutions",
+    "The alphas associated by alpha associations are available within the kernel or its referred kernels",
+    "All input alphas of the activity spaces are available within the kernel or its referred kernels",
+    "Completion criteria are only expressed in terms of states which belong to alphas which are available in the kernel or its referred kernels."
+  ]
+}

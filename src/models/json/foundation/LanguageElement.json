@@ -1,0 +1,11 @@
+{
+  "isSuppressible": true,
+  "owner": "elementGroup id",
+  "tags": ["tags is"],
+  "resources": ["resource ids"],
+  "properties": [],
+  "invariant": [
+    "All language elements that are not element groups need an owner",
+    "Each and every instance of LanguageElement may be related to each other via endeavor associations"
+  ]
+}

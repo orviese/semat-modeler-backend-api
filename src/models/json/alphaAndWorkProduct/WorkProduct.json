@@ -1,0 +1,5 @@
+{
+  "basicElement": "",
+  "levelOfDetail": ["level of detail ids 0..*"],
+  "invariant": "All levels of detail of a work product must have different names"
+}

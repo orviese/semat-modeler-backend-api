@@ -21,11 +21,8 @@ server.use(express.urlencoded({extended: true }));
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(express.static(path.join(__dirname, 'public')));
 
-
-
 /*routes here*/
 server.use('/account', accountRoutes);
-
 
 db.connectToDb().then(r => _console.info('then on connecting db'));
 

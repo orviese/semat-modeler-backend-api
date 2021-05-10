@@ -1,0 +1,5 @@
+{
+  "elementGroup": "",
+  "meta": "A practice asset is a container that names a collection of language element that are no element groups",
+  "invariant": "A practice asset may not own element groups"
+}

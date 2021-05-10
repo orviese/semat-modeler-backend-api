@@ -1,0 +1,8 @@
+{
+  "name": "",
+  "lowerBound": 1,
+  "upperBound": 2,
+  "association": "endeavorAssociation",
+  "owningAssociation": "owningAssociation",
+  "type": "Type is or name"
+}

@@ -1,0 +1,7 @@
+{
+  "languageElement": "",
+  "name": "Assist",
+  "briefDescription": "",
+  "level": 1,
+  "checkListItem": ["check point ids 0..*"]
+}

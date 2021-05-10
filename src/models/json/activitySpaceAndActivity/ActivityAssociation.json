@@ -1,0 +1,7 @@
+{
+  "languageElement": "",
+  "kind": "The kind of association",
+  "end1": "Abstract Activity 1",
+  "end2": "Abstract activity 1",
+  "invariant": "Activity spaces can only be part of other activity spaces."
+}

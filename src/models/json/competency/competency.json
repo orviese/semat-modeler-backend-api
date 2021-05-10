@@ -1,0 +1,8 @@
+{
+  "basicElement": "",
+  "possibleLevel": ["competency level IDs *"],
+  "skills": [
+    "Communication", "Negotiation", "etc..."
+  ],
+  "invariant": "The possible levels are distinct"
+}

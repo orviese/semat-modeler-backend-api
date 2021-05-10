@@ -1,0 +1,7 @@
+{
+  "languageElement": "",
+  "description": "",
+  "state": "alpha state id 0..1",
+  "levelOfDetail": "work product level of detail id 0..1",
+  "invariant": "A criterion addresses either a state or a level of detail "
+}

@@ -1,0 +1,7 @@
+{
+  "languageElement": "",
+  "kind": "create | read | update | delete",
+  "alpha": ["alpha ids 0..*"],
+  "workProduct": ["work product ids 0..*"],
+  "invariant": "The action touches either alphas or work products, but not both nor nothing"
+}

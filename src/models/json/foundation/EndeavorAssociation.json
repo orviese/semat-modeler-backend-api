@@ -1,0 +1,4 @@
+{
+  "memberEnd": ["EndeavorProperty 2..*"],
+  "ownedEnd": ["EndeavorProperty *"]
+}

@@ -52,10 +52,11 @@ exports.signIn = async (req, res) => {
                         { expiresIn: '4h' });
                     res.cookie('x-auth-token',`${token}`, {httpOnly: true, sameSite:'lax'});
                     res.status(200).json({
-                        id: account._id,
-                        name: account.name,
-                        email: account.email,
-                        status: account.status});
+                            id: account._id,
+                            name: account.name,
+                            email: account.email,
+                            status: account.status,
+                        });
                 }else {
                     res.status(401).json({errors: ['Invalid account information!']});
                 }

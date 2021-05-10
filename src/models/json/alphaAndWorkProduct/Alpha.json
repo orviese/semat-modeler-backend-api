@@ -1,0 +1,5 @@
+{
+  "basicElement": "",
+  "states": ["state ids 1..*"],
+  "invariant": "All states of an alpha must have different names."
+}
