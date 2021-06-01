@@ -25,6 +25,11 @@ const accountSchema = mongoose.Schema({
         minLength: 6,
         trim: true
     },
+    role: {
+        type: String,
+        enum: ['administrator', 'modeler', 'validator', 'guest'],
+        default: 'guest'
+    },
     status: {
         type: String,
         enum: ['active', 'inactive', 'deleted'],

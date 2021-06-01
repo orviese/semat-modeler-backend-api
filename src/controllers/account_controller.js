@@ -18,7 +18,8 @@ exports.signUp = async (req, res) => {
         const account = await Account.findOne({email: email});
         if (account) {
             return res.status(400)
-                .json({errors: ['Account could not be created with information provided']});
+                .json({errors: ['Account could not be created with information provided, ' +
+                    'maybe the email already has an account.']});
         }
         const newAccount = new Account({name, email, password});
         const savedAccount = await newAccount.save();
@@ -47,7 +48,8 @@ exports.signIn = async (req, res) => {
                             id: account._id,
                             name: account.name,
                             email: account.email,
-                            status: account.status
+                            status: account.status,
+                            role: account.role
                         }, process.env.JWT_SECRET,
                         { expiresIn: '4h' });
                     res.cookie('x-auth-token',`${token}`, {httpOnly: true, sameSite:'lax'});
@@ -56,6 +58,7 @@ exports.signIn = async (req, res) => {
                             name: account.name,
                             email: account.email,
                             status: account.status,
+                            role: account.role
                         });
                 }else {
                     res.status(401).json({errors: ['Invalid account information!']});

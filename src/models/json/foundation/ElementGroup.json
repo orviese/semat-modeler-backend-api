@@ -3,5 +3,7 @@
   "name": "",
   "icon": "",
   "briefDescription": "",
-  "description": ""
+  "description": "",
+  "referredElements" : [],
+  "ownedElements": []
 }

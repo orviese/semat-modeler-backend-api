@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const methodSchema = mongoose.Schema({
+const competencySchema = mongoose.Schema({
     isSuppressible: {type: Boolean, default: true},
-    owner: {type: String, default: '', required: false},
+    owner: {type: String, default: ''},
     tags: [String],
     resources: [String],
     properties: [String],
@@ -10,7 +10,8 @@ const methodSchema = mongoose.Schema({
     icon: String,
     briefDescription: String,
     description: {type: String, trim: true},
-    baseKernel: {type: String, default: ''}
+    possibleLevel: [String],
+    skills: [String]
 });
 
-module.exports = mongoose.model('Method', methodSchema);
+module.exports = mongoose.model('Competency', competencySchema);

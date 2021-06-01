@@ -5,5 +5,13 @@
   "measures": [""],
   "entry": [""],
   "result": [""],
-  "invariant": "The alphas and the work products associated by the work product manifests are visible within the practice."
+  "invariant": [
+    "The alphas and the work products associated by the work product manifests are visible within the practice. ",
+    "Associated activities are visible within the practice",
+    "All alphas and work products involved in actions of activities are available within the practice.",
+    "Completion criteria are only expressed in terms of states which belong to alphas or levels of detail which belong to work products which are available in the practice.",
+    "The activities’ required competencies are visible within the practice.",
+    "All elements associated with a patterns are visible within the practice."
+  ]
+
 }
