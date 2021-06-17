@@ -10,6 +10,7 @@ const db = require('./setting/database');
 const accountRoutes = require('./routes/account_routes');
 const areaOfConcern = require('./routes/area_of_concern_routes');
 const alpha = require('./routes/alpha_routes');
+const practice = require('./routes/practice_routes');
 
 const server = express();
 
@@ -27,6 +28,7 @@ server.use(express.static(path.join(__dirname, 'public')));
 server.use('/account', accountRoutes);
 server.use('/area-of-concern', areaOfConcern);
 server.use('/alphas', alpha);
+server.use('/practices', practice);
 
 db.connectToDb().then(r => _console.info('then on connecting db'));
 
