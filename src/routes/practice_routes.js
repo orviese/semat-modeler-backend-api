@@ -25,4 +25,6 @@ router.patch('',
     ], practiceControl.updatePractice
 );
 
+router.get('', [auth], practiceControl.getAllPractices);
+
 module.exports = router;

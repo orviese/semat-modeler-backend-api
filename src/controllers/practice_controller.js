@@ -1,4 +1,3 @@
-
 const _console = require('consola');
 const {validationResult} = require('express-validator');
 const Practice = require('../models/Practice');
@@ -49,5 +48,20 @@ exports.updatePractice = async (req, res) => {
     } catch (e) {
         _console.error('Error editing practice', e);
         res.status(400).json({errors: ['no changes']});
+    }
+};
+
+exports.getAllPractices = async (req, res) => {
+    _console.info('Attempting to get all practices!!');
+    try {
+        const practices = await Practice.find({});
+        if (practices !== null) {
+            res.status(200).json({practices: practices});
+        } else {
+            res.status(400).json({errors: ['problems  getting all data']});
+        }
+    } catch (e) {
+        _console.error('Error getting practice', e);
+        res.status(400).json({errors: ['Error getting all data']});
     }
 };
