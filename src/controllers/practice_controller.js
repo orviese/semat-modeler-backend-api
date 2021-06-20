@@ -10,8 +10,8 @@ exports.addPractice = async (req, res) => {
         return res.status(400).json({errors: errors.array().map(e=>e.msg)});
     }
     try {
-        const {name, objective} = req.body;
-        const practice = new Practice({name, objective});
+        const {name, objective, tags, resources, properties} = req.body;
+        const practice = new Practice({name, objective, tags, resources, properties});
         const savedPractice = await practice.save();
         res.status(201).json(savedPractice);
         _console.success('Practice created!')
@@ -28,17 +28,19 @@ exports.updatePractice = async (req, res) => {
         _console.warn('Validation problems!!')
         return res.status(400).json({errors: errors.array().map(e=>e.msg)});
     }
-    const {id, name, objective} = req.body;
+    const {id, name, objective, tags, resources, properties} = req.body;
     try {
         let practice = await Practice.findById(id);
         if (practice !== null) {
             practice.name = name;
             practice.objective = objective;
+            practice.tags = tags;
             practice.save();
             res.status(200).json({
                 _id: practice._id,
                 name: practice.name,
-                objective: practice.objective
+                objective: practice.objective,
+                tags: practice.tags
             });
             _console.info('Practice updated!')
         } else {
