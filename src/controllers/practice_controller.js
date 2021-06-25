@@ -10,8 +10,8 @@ exports.addPractice = async (req, res) => {
         return res.status(400).json({errors: errors.array().map(e=>e.msg)});
     }
     try {
-        const {name, objective, tags, resources, properties} = req.body;
-        const practice = new Practice({name, objective, tags, resources, properties});
+        const {name, objective, tags, resources, properties, measures, entry, result} = req.body;
+        const practice = new Practice({name, objective, tags, resources, properties, measures, entry, result});
         const savedPractice = await practice.save();
         res.status(201).json(savedPractice);
         _console.success('Practice created!')
@@ -28,21 +28,34 @@ exports.updatePractice = async (req, res) => {
         _console.warn('Validation problems!!')
         return res.status(400).json({errors: errors.array().map(e=>e.msg)});
     }
-    const {id, name, objective, tags, resources, properties} = req.body;
+    const {_id, name, objective, tags, resources, properties, measures, entry, result} = req.body;
     try {
-        let practice = await Practice.findById(id);
+        let practice = await Practice.findById(_id);
         if (practice !== null) {
             practice.name = name;
             practice.objective = objective;
             practice.tags = tags;
+            practice.resources = resources;
+            practice.properties = properties;
+            practice.measures = measures;
+            practice.entry = entry;
+            practice.result = result;
             practice.save();
+            res.status(200).json(practice);
+            /*
             res.status(200).json({
-                _id: practice._id,
+             _id: practice._id,
                 name: practice.name,
                 objective: practice.objective,
-                tags: practice.tags
-            });
-            _console.info('Practice updated!')
+                tags: practice.tags,
+                resources: practice.resources,
+                properties: practice.properties,
+                measures: practice.measures,
+                entry: practice.entry,
+                result: practice.result
+                practice
+            });*/
+            _console.info('Practice updated!', practice)
         } else {
             res.status(404).json({errors: ['no practice found']});
         }

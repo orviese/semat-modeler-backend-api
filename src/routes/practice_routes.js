@@ -16,7 +16,7 @@ router.post('/',
 router.patch('',
     [
         auth,
-        body('id', 'Id is required update your practice')
+        body('_id', 'Id is required update your practice')
             .not().isEmpty(),
         body('name', 'A name is necessary to identify your practice')
             .not().isEmpty(),

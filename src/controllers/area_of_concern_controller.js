@@ -41,8 +41,8 @@ exports.updateAreaOfConcern = async (req, res) => {
         return res.status(400).json({errors: errors.array().map(e => e.msg)});
     }
     try {
-        const {id, name, description, colorConvention} = req.body;
-        const areaOfConcernFound = await AreaOfConcern.findById(id,
+        const {_id, name, description, colorConvention} = req.body;
+        const areaOfConcernFound = await AreaOfConcern.findById(_id,
             '_id name description colorConvention');
         if (areaOfConcernFound) {
             areaOfConcernFound.name = name;

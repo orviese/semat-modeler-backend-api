@@ -15,12 +15,13 @@ router.post('/',
 
 router.put('/', [
         auth,
-        body('id', 'Invalid id').not().isEmpty(),
+        body('_id', 'Invalid id').not().isEmpty(),
         body('name', 'A name is necessary').not().isEmpty(),
         body('description', '').not().isEmpty(),
         body('colorConvention', 'Color convention required').not().isEmpty()
     ],
     areaOfConcernController.updateAreaOfConcern);
+
 router.get('/', [auth], areaOfConcernController.getAllAreaOfConcern);
 
 router.get('/:id', [

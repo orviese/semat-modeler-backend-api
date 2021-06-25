@@ -15,8 +15,9 @@ const practice = require('./routes/practice_routes');
 const server = express();
 
 const corsOptions = {
-    origin: process.env.ALLOWED_ORIGIN,
-    credentials: true }
+    credentials: true,
+    origin: process.env.ALLOWED_ORIGIN
+}
 server.use(cors(corsOptions));
 server.use(express.json());
 server.use(cookieParser());
@@ -26,7 +27,7 @@ server.use(express.static(path.join(__dirname, 'public')));
 
 /*routes here*/
 server.use('/account', accountRoutes);
-server.use('/area-of-concern', areaOfConcern);
+server.use('/areas-of-concern', areaOfConcern);
 server.use('/alphas', alpha);
 server.use('/practices', practice);
 
