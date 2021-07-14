@@ -11,6 +11,7 @@ const accountRoutes = require('./routes/account_routes');
 const areaOfConcern = require('./routes/area_of_concern_routes');
 const alpha = require('./routes/alpha_routes');
 const practice = require('./routes/practice_routes');
+const activitySpace = require('./routes/activity_space_routes');
 
 const server = express();
 
@@ -30,6 +31,7 @@ server.use('/account', accountRoutes);
 server.use('/areas-of-concern', areaOfConcern);
 server.use('/alphas', alpha);
 server.use('/practices', practice);
+server.use('/activity-spaces', activitySpace);
 
 db.connectToDb().then(r => _console.info('then on connecting db'));
 

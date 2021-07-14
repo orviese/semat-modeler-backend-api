@@ -8,20 +8,33 @@ router.post('/',
     [
         auth,
         body('name', 'A name is necessary').not().isEmpty(),
-        body('description', 'Description is required').not().isEmpty()
+        body('description', 'Description is required').not().isEmpty(),
+        body('briefDescription', 'Brief Description is required').not().isEmpty()
     ], alphaController.addAlpha);
 
-/*
+router.get('/',
+    [
+        auth
+    ], alphaController.fetchAllAlphas
+);
+
+router.get('/practice/:id',
+    [
+        auth,
+        check('id','Invalid id').not().isEmpty(),
+    ], alphaController.fetchKernelAndPracticeAlphas
+);
+
 router.put('/', [
         auth,
-        body('id', 'Invalid id').not().isEmpty(),
+        body('_id', 'Invalid id').not().isEmpty(),
         body('name', 'A name is necessary').not().isEmpty(),
-        body('description', '').not().isEmpty(),
-        body('colorConvention', 'Color convention required').not().isEmpty()
-    ],
-    areaOfConcernController.updateAreaOfConcern);
-router.get('/', [auth], areaOfConcernController.getAllAreaOfConcern);
+        body('description', 'Description is required').not().isEmpty(),
+        body('briefDescription', 'Brief Description is required').not().isEmpty()
+    ], alphaController.updateAlpha);
 
+/*
+router.get('/', [auth], areaOfConcernController.getAllAreaOfConcern);
 router.get('/:id', [
             auth,
             check('id','Invalid id').not().isEmpty(),

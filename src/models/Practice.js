@@ -21,6 +21,7 @@ const practiceSchema = mongoose.Schema({
                 isKernel: {type: Boolean, default: false},
                 areaOfConcern: String,
                 owner: {type: String, default: ''},
+                parent: {type: String, default: ''},
                 tags: [String],
                 resources: [String],
                 properties: [String],

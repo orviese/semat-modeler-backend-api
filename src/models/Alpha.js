@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const AlphaSchema = mongoose.Schema({
     isSuppressible: {type: Boolean, default: true},
     isKernel: {type: Boolean, default: true},
-    areaOfConcern: String,
+    areaOfConcern: {type: String, default: ''},
+    superAlpha: {type: String, default: ''},
     owner: {type: String, default: ''},
     tags: [String],
     resources: [String],

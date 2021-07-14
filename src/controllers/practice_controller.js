@@ -80,3 +80,44 @@ exports.getAllPractices = async (req, res) => {
         res.status(400).json({errors: ['Error getting all data']});
     }
 };
+
+exports.addOwnedAlpha = async (req, res) => {
+    try {
+        _console.info("Alpha to add into practice ",req.body.alpha)
+        const result = await Practice.findById(req.body.practiceId);
+        if (null !== result) {
+            result.ownedElements.alphas.push(req.body.alpha);
+            result.save(function (err) {
+                console.log('error after saving alpha practice >> ' + err);
+                if (err !== null){
+                    res.status(400).send({message:'error after saving alpha item'})
+                }else{
+                    res.send({
+                        alphas: result.ownedElements.alphas
+                    });
+                }
+            })
+        }
+    } catch (e) {
+        console.error(e)
+        res.status(400).json({errors: ['Error adding practice alpha']});
+    }
+}
+
+exports.removeOwnedAlpha = async (req, res) => {
+    try {
+        _console.info("Alpha to remove from practice ",req.params.alpha)
+        let practice = await Practice.findById(req.params.practice);
+        if (practice !== null) {
+            practice.ownedElements.alphas.id(req.params.alpha).remove();
+            practice.save();
+            res.send({
+                alphas: practice.ownedElements.alphas
+            });
+        } else {
+            res.status(404).json({errors: [`Practice not found ${req.params.practice}`]})
+        }
+    }catch (e) {
+        res.status(400).json({errors: ['Error removing practice alpha']});
+    }
+}

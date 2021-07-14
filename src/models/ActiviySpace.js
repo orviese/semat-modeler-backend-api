@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const activitySpaceSchema = mongoose.Schema({
     isSuppressible: {type: Boolean, default: true},
     isKernel: {type: Boolean, default: false},
-    areaOfConcern: {String},
+    areaOfConcern: {type: String, default: ''},
     owner: {type: String, default: ''},
     tags: [String],
     resources: [String],

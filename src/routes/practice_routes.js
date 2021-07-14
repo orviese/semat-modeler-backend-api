@@ -27,4 +27,8 @@ router.patch('',
 
 router.get('', [auth], practiceControl.getAllPractices);
 
+router.post('/owned-element/alpha', [auth], practiceControl.addOwnedAlpha);
+
+router.delete('/:practice/owned-element/alpha/:alpha', [auth], practiceControl.removeOwnedAlpha);
+
 module.exports = router;
