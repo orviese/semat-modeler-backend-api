@@ -12,6 +12,7 @@ const areaOfConcern = require('./routes/area_of_concern_routes');
 const alpha = require('./routes/alpha_routes');
 const practice = require('./routes/practice_routes');
 const activitySpace = require('./routes/activity_space_routes');
+const competency = require('./routes/competency_routes');
 
 const server = express();
 
@@ -32,6 +33,7 @@ server.use('/areas-of-concern', areaOfConcern);
 server.use('/alphas', alpha);
 server.use('/practices', practice);
 server.use('/activity-spaces', activitySpace);
+server.use('/competencies', competency);
 
 db.connectToDb().then(r => _console.info('then on connecting db'));
 

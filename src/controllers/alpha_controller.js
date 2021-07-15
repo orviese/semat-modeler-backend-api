@@ -11,19 +11,19 @@ exports.addAlpha = async (req, res) => {
         return res.status(400).json({errors: errors.array().map(e => e.msg)});
     }
     try {
-        const {name, description, briefDescription, isKernel, areaOfConcern, owner, superAlpha} = req.body;
-        _console.log(req.body)
+        const {name, description, briefDescription, isKernel, owner, superAlpha, areaOfConcern} = req.body;
+
         const alphaFound = await Alpha.findOne({name: name});
-        _console.log(alphaFound);
         if (alphaFound) {
-            return res.status(400)
-                .json({errors: [`Choose another name for the ${model}`]});
+            return res.status(400).json({errors: [`Choose another name for the ${model}`]});
         }
         const newAlpha = new Alpha({
-            name, description, briefDescription, isKernel, areaOfConcern, owner, superAlpha
+            name, description, briefDescription, isKernel,
+            areaOfConcern: areaOfConcern._id,
+            owner,
+            superAlpha: superAlpha._id
         });
         const result = await newAlpha.save();
-        _console.log(result)
         res.status(201).json(result);
     } catch (e) {
         _console.error(`Problems creating ${model}`, e);
@@ -36,18 +36,23 @@ exports.updateAlpha = async (req, res) => {
     try {
         let alphaFound = await Alpha.findById(req.body._id);
         if (null !== alphaFound) {
-            const { name, description, briefDescription, isKernel, areaOfConcern, owner, superAlpha } = req.body;
+            const {name, description, briefDescription, isKernel, areaOfConcern, owner, superAlpha} = req.body;
+
+            _console.log(areaOfConcern)
+            _console.log(superAlpha)
+
             alphaFound.name = name;
             alphaFound.description = description;
             alphaFound.briefDescription = briefDescription;
             alphaFound.isKernel = isKernel;
-            alphaFound.areaOfConcern = areaOfConcern;
-            alphaFound.superAlpha = superAlpha;
+            alphaFound.areaOfConcern = areaOfConcern._id;
+            alphaFound.superAlpha = superAlpha !== null ? superAlpha._id : null;
             alphaFound.owner = owner;
-            let result = await alphaFound.save(req.body);
+            let result = await alphaFound.save();
             res.status(200).json(result);
         }
-    }catch (e) {
+    } catch (e) {
+        _console.error(e);
         res.status(400).json({errors: ['Problems updating alpha']});
     }
 }
@@ -55,10 +60,16 @@ exports.updateAlpha = async (req, res) => {
 exports.fetchAllAlphas = async (req, res) => {
     _console.info(`Attempting to get all ${model}!!`);
     try {
+        const options = [
+            {path: 'areaOfConcern', skipInvalidIds: true},
+            {path: 'superAlpha', skipInvalidIds: true}
+        ]
         const alphas = await Alpha.find({},
-            'id isKernel name briefDescription description owner areaOfConcern superAlpha');
+            'id isKernel name briefDescription description owner areaOfConcern superAlpha')
+        .populate(options);
         res.status(200).json({alphas});
-    }catch (e) {
+    } catch (e) {
+        _console.error(e);
         res.status(404).json({errors: ['Problems getting alphas']});
     }
 }
@@ -66,8 +77,7 @@ exports.fetchAllAlphas = async (req, res) => {
 exports.fetchKernelAndPracticeAlphas = async (req, res) => {
     const id = req.params.id;
     try {
-        const alphas = await  Alpha.find({$or: [{isKernel:true}, {owner:id}]});
-        console.log(alphas);
+        const alphas = await Alpha.find({$or: [{isKernel: true}, {owner: id}]});
         res.status(200).json({alphas});
     } catch (e) {
         res.status(400).json({errors: ['Problems getting alphas']});

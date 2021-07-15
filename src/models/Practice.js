@@ -35,7 +35,10 @@ const practiceSchema = mongoose.Schema({
         activitySpaces: [],
         activities: [],
         activityAssociations: [],
-        workProducts: [],
+        workProducts: [{
+            type: mongoose.ObjectId,
+            ref: "WorkProduct"
+        }],
         actions: []
     },
     consistencyRules: String,
