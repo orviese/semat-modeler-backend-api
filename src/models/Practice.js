@@ -15,30 +15,11 @@ const practiceSchema = mongoose.Schema({
         activitySpaces: [String]
     },
     ownedElements: {
-        alphas: [
-            {
-                isSuppressible: {type: Boolean, default: true},
-                isKernel: {type: Boolean, default: false},
-                areaOfConcern: String,
-                owner: {type: String, default: ''},
-                parent: {type: String, default: ''},
-                tags: [String],
-                resources: [String],
-                properties: [String],
-                name: {type: String, required: true, trim: true},
-                icon: String,
-                briefDescription: String,
-                description: {type: String, trim: true},
-                states: [String]
-            }
-        ],
+        alphas: [{type: mongoose.ObjectId, ref: 'Alpha'}],
         activitySpaces: [],
         activities: [],
         activityAssociations: [],
-        workProducts: [{
-            type: mongoose.ObjectId,
-            ref: "WorkProduct"
-        }],
+        workProducts: [{type: mongoose.ObjectId, ref: "WorkProduct"}],
         actions: []
     },
     consistencyRules: String,

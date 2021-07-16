@@ -3,7 +3,7 @@ const router = express.Router();
 const areaOfConcernController = require('../controllers/area_of_concern_controller');
 const {body, check} = require("express-validator");
 const auth = require('../middlewares/auth');
-const requestValidation = require('../middlewares/request-errors');
+const requestValidation = require('../middlewares/request-prevalidation');
 
 router.post('/',
     [

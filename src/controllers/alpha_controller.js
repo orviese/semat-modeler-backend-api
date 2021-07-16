@@ -1,15 +1,9 @@
 const _console = require('consola');
-const {validationResult} = require('express-validator');
 const Alpha = require('../models/Alpha');
 const model = 'Alpha'
 
 exports.addAlpha = async (req, res) => {
     _console.info(`Attempting to create ${model}!!`);
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        _console.warn('Validation problems!!')
-        return res.status(400).json({errors: errors.array().map(e => e.msg)});
-    }
     try {
         const {name, description, briefDescription, isKernel, owner, superAlpha, areaOfConcern} = req.body;
 
@@ -37,10 +31,6 @@ exports.updateAlpha = async (req, res) => {
         let alphaFound = await Alpha.findById(req.body._id);
         if (null !== alphaFound) {
             const {name, description, briefDescription, isKernel, areaOfConcern, owner, superAlpha} = req.body;
-
-            _console.log(areaOfConcern)
-            _console.log(superAlpha)
-
             alphaFound.name = name;
             alphaFound.description = description;
             alphaFound.briefDescription = briefDescription;
@@ -77,7 +67,12 @@ exports.fetchAllAlphas = async (req, res) => {
 exports.fetchKernelAndPracticeAlphas = async (req, res) => {
     const id = req.params.id;
     try {
-        const alphas = await Alpha.find({$or: [{isKernel: true}, {owner: id}]});
+        const options = [
+            {path: 'areaOfConcern', skipInvalidIds: true},
+            {path: 'superAlpha', skipInvalidIds: true}
+        ]
+        const alphas = await Alpha.find({$or: [{isKernel: true}, {owner: id}]})
+            .populate(options);
         res.status(200).json({alphas});
     } catch (e) {
         res.status(400).json({errors: ['Problems getting alphas']});

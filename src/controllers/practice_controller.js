@@ -1,15 +1,11 @@
 const _console = require('consola');
-const {validationResult} = require('express-validator');
 const WorkProduct = require('../models/WorkProduct');
+const WorkProductManifest = require('../models/WorkProductManifest');
 const Practice = require('../models/Practice');
+const mongoose = require("mongoose");
 
 exports.addPractice = async (req, res) => {
     _console.info('Attempting to create a practice!');
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        _console.warn('Validation problems!!')
-        return res.status(400).json({errors: errors.array().map(e => e.msg)});
-    }
     try {
         const {name, objective, tags, resources, properties, measures, entry, result} = req.body;
         const practice = new Practice({name, objective, tags, resources, properties, measures, entry, result});
@@ -24,11 +20,6 @@ exports.addPractice = async (req, res) => {
 
 exports.updatePractice = async (req, res) => {
     _console.info('Attempting to update practice!!');
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        _console.warn('Validation problems!!')
-        return res.status(400).json({errors: errors.array().map(e => e.msg)});
-    }
     const {_id, name, objective, tags, resources, properties, measures, entry, result} = req.body;
     try {
         let practice = await Practice.findByIdAndUpdate(_id,
@@ -41,7 +32,14 @@ exports.updatePractice = async (req, res) => {
                 measures,
                 entry,
                 result
-            }, {new: true});
+            }, {new: true})
+            .populate([
+                {path: 'ownedElements.workProducts'},
+                {
+                    path: 'ownedElements.alphas',
+                    populate: {path: 'areaOfConcern', skipInvalidIds: true}
+                }
+            ]);
         res.status(200).json(practice);
     } catch (e) {
         _console.error('Error editing practice', e);
@@ -52,7 +50,14 @@ exports.updatePractice = async (req, res) => {
 exports.getAllPractices = async (req, res) => {
     _console.info('Attempting to get all practices!!');
     try {
-        const practices = await Practice.find({}).populate('ownedElements.workProducts');
+        const practices = await Practice.find({})
+            .populate([
+                {path: 'ownedElements.workProducts'},
+                {
+                    path: 'ownedElements.alphas',
+                    populate: {path: 'areaOfConcern', skipInvalidIds: true}
+                }
+            ]);
         if (practices !== null) {
             res.status(200).json({practices: practices});
         } else {
@@ -65,62 +70,81 @@ exports.getAllPractices = async (req, res) => {
 };
 
 exports.addOwnedAlpha = async (req, res) => {
-    try {
-        _console.info("Alpha to add into practice ", req.body.alpha)
-        const result = await Practice.findById(req.body.practiceId);
-        if (null !== result) {
-            result.ownedElements.alphas.push(req.body.alpha);
-            result.save(function (err) {
-                if (err !== null) {
-                    res.status(400).send({message: 'error after saving alpha item'})
-                } else {
-                    res.send({
-                        alphas: result.ownedElements.alphas
-                    });
-                }
-            })
+    _console.info(`Alpha to add into practice , ${req.params.alpha} , practice  ${req.params.practice}`);
+    Practice.findOne({
+        _id: mongoose.Types.ObjectId(req.params.practice),
+        'ownedElements.alphas': req.params.alpha
+    }).then(response => {
+        if (response === null) {
+            Practice.findByIdAndUpdate(req.params.practice,
+                {$push: {'ownedElements.alphas': req.params.alpha}}, {new: true})
+                .populate([
+                    {
+                        path: 'ownedElements.alphas',
+                        populate: {path: 'areaOfConcern', skipInvalidIds: true}
+                    }
+                ])
+                .then(response => {
+                    res.send({alphas: response.ownedElements.alphas.sort()});
+                })
+                .catch(error => {
+                    res.status(400).send({message: 'error after saving alpha item ' + error})
+                });
+        } else {
+            res.status(400).send({message: 'Alpha already exist for the practice ' + req.params.alpha})
         }
-    } catch (e) {
-        console.error(e)
-        res.status(400).json({errors: ['Error adding practice alpha']});
-    }
+    }).catch(error => {
+        res.status(400).send({message: 'error while saving alpha to practice ' + error})
+    });
 }
 
 exports.removeOwnedAlpha = async (req, res) => {
-    try {
-        _console.info("Alpha to remove from practice ", req.params.alpha)
-        let practice = await Practice.findById(req.params.practice);
-        if (practice !== null) {
-            practice.ownedElements.alphas.id(req.params.alpha).remove();
-            practice.save();
-            res.send({
-                alphas: practice.ownedElements.alphas
-            });
-        } else {
-            res.status(404).json({errors: [`Practice not found ${req.params.practice}`]})
+    _console.info("Alpha to remove from practice ", req.params.alpha)
+    Practice.findByIdAndUpdate(req.params.practice, {
+        $pull: {'ownedElements.alphas': req.params.alpha}
+    }, {new: true}).populate([
+        {
+            path: 'ownedElements.alphas',
+            skipInvalidIds: true,
+            populate: {path: 'areaOfConcern', skipInvalidIds: true}
         }
-    } catch (e) {
+    ])
+        .then(response => {
+            if (response !== null) {
+                res.send({
+                    alphas: response.ownedElements.alphas
+                });
+            } else {
+                res.status(404).json({errors: [`Practice not found ${req.params.practice}`]})
+            }
+        }).catch(error => {
+        _console.error(error)
         res.status(400).json({errors: ['Error removing practice alpha']});
-    }
+    })
 }
 
 exports.addWorkProduct = async (req, res) => {
     _console.info(`Creating work product for practice`);
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        _console.warn('Validation problems!!')
-        return res.status(400).json({errors: errors.array().map(e => e.msg)});
-    }
     const {name, description} = req.body;
     WorkProduct.create({name, description, owner: req.params.id})
         .then(wp => {
             return Practice.findByIdAndUpdate(req.params.id, {
                 $push: {"ownedElements.workProducts": wp._id}
-            }, {new: true}).populate('ownedElements.workProducts');
+            }, {new: true})
+
         })
         .then(practice => {
             if (practice !== null) {
-                res.json(practice);
+                practice.populate([
+                    {path: 'ownedElements.workProducts'},
+                    {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                ], (error, doc) => {
+                    if (error) {
+                        res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
+                    }
+                    res.json(doc);
+                });
+
             } else {
                 res.status(404).json({errors: [`Practice not found ${req.params.id}`]});
             }
@@ -145,4 +169,51 @@ exports.updateWorkProduct = async (req, res) => {
         .catch(error => {
             res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
         });
+}
+
+exports.addWorkProductManifest = async (req, res) => {
+    _console.info(`Creating work product manifest for practice`);
+    const owner = req.params.practice;
+    const {lowerBound, upperBound, alpha, workProduct} = req.body;
+    WorkProductManifest.create({
+        owner, lowerBound, upperBound, alpha, workProduct
+    }).then(response => {
+        response.populate([{path: 'alpha'}, {path: 'workProduct'}],
+            (error, doc) => {
+                if (error) {
+                    res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
+                }
+                res.json(response);
+            });
+    }).catch(error => {
+        res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
+    })
+}
+exports.getAllWorkProductManifest = async (req, res) => {
+    _console.info(`Getting all work product manifest for practice`);
+    WorkProductManifest.find({owner: req.params.practice})
+        .populate([{path: 'alpha'}, {path: 'workProduct'}])
+        .then(response => {
+            res.json({workProductManifest: response});
+        }).catch(error => {
+        res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
+    });
+}
+
+exports.deleteWorkProductManifest = async (req, res) => {
+    _console.info(`deleting work product manifest from practice`);
+    WorkProductManifest.findOneAndDelete({
+        _id: mongoose.Types.ObjectId(req.params.id),
+        owner: req.params.practice
+    }).then(() => {
+        WorkProductManifest.find({owner: req.params.practice})
+            .populate([{path: 'alpha'}, {path: 'workProduct'}])
+            .then(response => {
+                res.json({workProductManifests: response});
+            }).catch(error => {
+            res.status(400).json({errors: [`Problems getting practice work product ${error}`]});
+        });
+    }).catch(error => {
+        res.status(400).json({errors: [`Problems deleting practice work product ${error}`]});
+    });
 }

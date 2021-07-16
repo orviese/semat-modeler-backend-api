@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const competencyController = require('../controllers/competency-controller');
 const auth = require('../middlewares/auth');
+const requestValidation = require('../middlewares/request-prevalidation');
 const {body, check} = require("express-validator");
 
 router.post('/',
@@ -11,6 +12,7 @@ router.post('/',
             .trim().not().isEmpty(),
         body('description', 'A description is necessary')
             .trim().not().isEmpty(),
+        requestValidation
     ],
     competencyController.addCompetency);
 
@@ -22,7 +24,8 @@ router.put('/',
         auth,
         body('_id', 'Invalid id').not().isEmpty(),
         body('name', 'A name is necessary').not().isEmpty(),
-        body('description', 'Description is required').not().isEmpty()
+        body('description', 'Description is required').not().isEmpty(),
+        requestValidation
     ], competencyController.updateCompetency);
 
 module.exports = router
