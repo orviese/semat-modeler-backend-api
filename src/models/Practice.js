@@ -16,9 +16,9 @@ const practiceSchema = mongoose.Schema({
     },
     ownedElements: {
         alphas: [{type: mongoose.ObjectId, ref: 'Alpha'}],
-        activitySpaces: [],
-        activities: [],
-        activityAssociations: [],
+        activitySpaces: [{type: mongoose.ObjectId, ref: 'ActivitySpace'}],
+        activities: [{type: mongoose.ObjectId, ref: 'Activity'}],
+        activityAssociations: [{type: mongoose.ObjectId, ref: 'ActivityAssociation'}],
         workProducts: [{type: mongoose.ObjectId, ref: "WorkProduct"}],
         actions: []
     },

@@ -64,4 +64,19 @@ router.delete('/:practice/work-product-manifest/:id',
             requestValidation
     ], practiceControl.deleteWorkProductManifest);
 
+router.post('/:practice/owned-element/activity-space/:activitySpace',
+    [auth],
+    param('practice', 'Practice id required').not().notEmpty().not().contains('undefined'),
+    param('activitySpace', 'ActivitySpace id required').not().notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceControl.addOwnedActivitySpace);
+
+router.post('/:practice/activity',
+    [auth],
+    param('practice', 'Practice id required').not().notEmpty().not().contains('undefined'),
+    body('activitySpace', 'ActivitySpace id required').not().notEmpty(),
+    body('name', 'Name for activity id required').not().notEmpty(),
+    requestValidation,
+    practiceControl.addActivityToPractice);
+
 module.exports = router;

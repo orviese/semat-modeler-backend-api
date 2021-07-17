@@ -16,6 +16,8 @@ router.post('/',
 
 router.get('/',
     [auth], activitySpaceController.fetchAllActivitySpaces);
+router.get('/with-areas-of-concern',
+    [auth], activitySpaceController.fetchAllActivitySpacesWithAreas);
 
 router.put('/',
     [

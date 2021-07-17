@@ -2,6 +2,8 @@ const _console = require('consola');
 const WorkProduct = require('../models/WorkProduct');
 const WorkProductManifest = require('../models/WorkProductManifest');
 const Practice = require('../models/Practice');
+const Activity = require('../models/Activity');
+const ActivityAssociation = require('../models/ActivityAssociation');
 const mongoose = require("mongoose");
 
 exports.addPractice = async (req, res) => {
@@ -35,9 +37,13 @@ exports.updatePractice = async (req, res) => {
             }, {new: true})
             .populate([
                 {path: 'ownedElements.workProducts'},
-                {
-                    path: 'ownedElements.alphas',
-                    populate: {path: 'areaOfConcern', skipInvalidIds: true}
+                {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                {path: 'ownedElements.activityAssociations',
+                    populate: [
+                        {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
+                        {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                    ]
                 }
             ]);
         res.status(200).json(practice);
@@ -53,9 +59,13 @@ exports.getAllPractices = async (req, res) => {
         const practices = await Practice.find({})
             .populate([
                 {path: 'ownedElements.workProducts'},
-                {
-                    path: 'ownedElements.alphas',
-                    populate: {path: 'areaOfConcern', skipInvalidIds: true}
+                {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                {path: 'ownedElements.activityAssociations',
+                    populate: [
+                        {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
+                        {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                    ]
                 }
             ]);
         if (practices !== null) {
@@ -107,7 +117,8 @@ exports.removeOwnedAlpha = async (req, res) => {
             path: 'ownedElements.alphas',
             skipInvalidIds: true,
             populate: {path: 'areaOfConcern', skipInvalidIds: true}
-        }
+        },
+
     ])
         .then(response => {
             if (response !== null) {
@@ -137,7 +148,15 @@ exports.addWorkProduct = async (req, res) => {
             if (practice !== null) {
                 practice.populate([
                     {path: 'ownedElements.workProducts'},
-                    {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                    {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                    {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                    {path: 'ownedElements.activityAssociations',
+                        populate: [
+                            {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
+                            {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                        ]
+                    }
+
                 ], (error, doc) => {
                     if (error) {
                         res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
@@ -192,7 +211,7 @@ exports.addWorkProductManifest = async (req, res) => {
 exports.getAllWorkProductManifest = async (req, res) => {
     _console.info(`Getting all work product manifest for practice`);
     WorkProductManifest.find({owner: req.params.practice})
-        .populate([{path: 'alpha'}, {path: 'workProduct'}])
+        .populate([{path: 'alpha', populate: {path: 'areaOfConcern'}}, {path: 'workProduct'}])
         .then(response => {
             res.json({workProductManifest: response});
         }).catch(error => {
@@ -216,4 +235,68 @@ exports.deleteWorkProductManifest = async (req, res) => {
     }).catch(error => {
         res.status(400).json({errors: [`Problems deleting practice work product ${error}`]});
     });
+}
+
+exports.addOwnedActivitySpace = async (req, res) => {
+    _console.info(`Activity Space to add into practice ,
+     ${req.params.activitySpace} , practice  ${req.params.practice}`);
+    Practice.findOne({
+        _id: mongoose.Types.ObjectId(req.params.practice),
+        'ownedElements.activitySpaces': req.params.activitySpace
+    }).then(response => {
+        if (response === null) {
+            Practice.findByIdAndUpdate(req.params.practice,
+                {$push: {'ownedElements.activitySpaces': req.params.activitySpace}}, {new: true})
+                .populate([
+                    {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                ])
+                .then(response => {
+                    res.send({activitySpaces: response.ownedElements.activitySpaces});
+                })
+                .catch(error => {
+                    res.status(400).send({message: 'error after saving activity space item ' + error})
+                });
+        } else {
+            res.status(400).send({message: 'Activity Space already exist for the practice ' + req.params.alpha})
+        }
+    }).catch(error => {
+        res.status(400).send({message: 'error while saving activity space to practice ' + error})
+    });
+}
+
+exports.addActivityToPractice = async (req, res) => {
+    _console.info('Attempting to create an activity for practice ' + req.params.practice);
+    const {activitySpace, competencies, name} = req.body;
+    try {
+        const activity = await Activity.create({
+            name,
+            requiredCompetencyLevel: competencies,
+            owner: req.params.practice
+        });
+        const activityAssociation = await ActivityAssociation.create({
+            end1: activity._id,
+            end2: activitySpace,
+            owner: req.params.practice
+        });
+        const practice = await Practice.findByIdAndUpdate(req.params.practice, {
+            $push: {
+                'ownedElements.activities': activity._id,
+                'ownedElements.activityAssociations': activityAssociation._id
+            }
+        }, {new: true})
+            .populate([
+                {path: 'ownedElements.workProducts'},
+                {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
+                {path: 'ownedElements.activityAssociations',
+                    populate: [
+                        {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
+                        {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                    ]
+                }
+            ]);
+        res.json(practice);
+    } catch (e) {
+        res.status(400).send({message: 'error while saving activity to practice ' + e})
+    }
 }

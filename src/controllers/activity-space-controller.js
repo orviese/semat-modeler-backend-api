@@ -32,6 +32,18 @@ exports.fetchAllActivitySpaces = async (req, res) => {
     }
 }
 
+exports.fetchAllActivitySpacesWithAreas = async (req, res) => {
+    _console.info(`Getting all ${model}`);
+    try {
+        let activitySpaces = await ActivitySpace.find({})
+            .populate('areaOfConcern');
+        res.json({activitySpaces});
+    } catch (e) {
+        _console.error(e);
+        res.status(400).json({errors: [`Problems creating the ${model}`]});
+    }
+}
+
 exports.updateActivitySpace = async (req, res) => {
     _console.info(`updating  ${model}`);
     const errors = validationResult(req);
