@@ -8,17 +8,17 @@ const {body, param} = require("express-validator");
 router.post('/',
     [
         auth,
-        body('name', 'A name is necessary to identify your practice').not().isEmpty(),
-        body('objective', 'Objective is required for your practice').not().isEmpty(),
+        body('name', 'A name is necessary to identify your practice').notEmpty(),
+        body('objective', 'Objective is required for your practice').notEmpty(),
         requestValidation
     ], practiceControl.addPractice);
 
 router.patch('',
     [
         auth,
-        body('_id', 'Id is required update your practice').not().isEmpty(),
-        body('name', 'A name is necessary to identify your practice').not().isEmpty(),
-        body('objective', 'Objective is required for your practice').not().isEmpty(),
+        body('_id', 'Id is required update your practice').notEmpty(),
+        body('name', 'A name is necessary to identify your practice').notEmpty(),
+        body('objective', 'Objective is required for your practice').notEmpty(),
         requestValidation
     ], practiceControl.updatePractice
 );
@@ -31,7 +31,7 @@ router.delete('/:practice/owned-element/alpha/:alpha', [auth], practiceControl.r
 
 router.post('/:id/work-product',
     [auth,
-        param('id', 'path param id not present').not().isEmpty(),
+        param('id', 'Practice id not present').not().notEmpty().not().contains('undefined'),
         body('name', 'A name is necessary to identify your practice').not().isEmpty(),
         body('description', 'A name is necessary to identify your practice').not().isEmpty(),
         requestValidation
@@ -46,7 +46,7 @@ router.put('/work-product',
 
 router.post('/:practice/work-product-manifest',
     [auth,
-            param('practice', 'Practice id required').not().isEmpty(),
+            param('practice', 'Practice id required').not().notEmpty().not().contains('undefined'),
             body(['lowerBound', 'upperBound', 'alpha', 'workProduct'],
                 'work product fields required').not().isEmpty(),
             requestValidation
@@ -71,6 +71,13 @@ router.post('/:practice/owned-element/activity-space/:activitySpace',
     requestValidation,
     practiceControl.addOwnedActivitySpace);
 
+router.delete('/:practice/owned-element/activity-space/:activitySpace',
+    [auth],
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    param('activitySpace', 'ActivitySpace id required').notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceControl.removeOwnedActivitySpace);
+
 router.post('/:practice/activity',
     [auth],
     param('practice', 'Practice id required').not().notEmpty().not().contains('undefined'),
@@ -78,5 +85,13 @@ router.post('/:practice/activity',
     body('name', 'Name for activity id required').not().notEmpty(),
     requestValidation,
     practiceControl.addActivityToPractice);
+
+router.delete('/:practice/activity/:activity',
+    [auth],
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    param('activity', 'activity id required').notEmpty().not().contains('undefined'),
+    body('activityAssociation', 'activityAssociation id required').notEmpty(),
+    requestValidation,
+    practiceControl.removeOwnedActivity);
 
 module.exports = router;

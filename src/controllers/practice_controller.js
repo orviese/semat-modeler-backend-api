@@ -39,9 +39,14 @@ exports.updatePractice = async (req, res) => {
                 {path: 'ownedElements.workProducts'},
                 {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
                 {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
-                {path: 'ownedElements.activityAssociations',
+                {
+                    path: 'ownedElements.activityAssociations',
                     populate: [
-                        {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
+                        {
+                            path: 'end1',
+                            skipInvalidIds: true,
+                            populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}
+                        },
                         {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
                     ]
                 }
@@ -61,9 +66,14 @@ exports.getAllPractices = async (req, res) => {
                 {path: 'ownedElements.workProducts'},
                 {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
                 {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
-                {path: 'ownedElements.activityAssociations',
+                {
+                    path: 'ownedElements.activityAssociations',
                     populate: [
-                        {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
+                        {
+                            path: 'end1',
+                            skipInvalidIds: true,
+                            populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}
+                        },
                         {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
                     ]
                 }
@@ -150,10 +160,19 @@ exports.addWorkProduct = async (req, res) => {
                     {path: 'ownedElements.workProducts'},
                     {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
                     {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
-                    {path: 'ownedElements.activityAssociations',
+                    {
+                        path: 'ownedElements.activityAssociations',
                         populate: [
-                            {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
-                            {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                            {
+                                path: 'end1',
+                                skipInvalidIds: true,
+                                populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}
+                            },
+                            {
+                                path: 'end2',
+                                skipInvalidIds: true,
+                                populate: {path: 'areaOfConcern', skipInvalidIds: true}
+                            }
                         ]
                     }
 
@@ -264,6 +283,22 @@ exports.addOwnedActivitySpace = async (req, res) => {
     });
 }
 
+exports.removeOwnedActivitySpace = async (req, res) => {
+    _console.info('Attempting to remove owned activity space for practice ' + req.params.practice);
+    Practice.findByIdAndUpdate(req.params.practice, {
+        $pull: {'ownedElements.activitySpaces': req.params.activitySpace},
+    }, {new: true})
+        .populate([
+            {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+        ])
+        .then(response => {
+            res.send({activitySpaces: response.ownedElements.activitySpaces});
+        })
+        .catch(error => {
+            res.status(400).send({message: 'error after removing activity space item ' + error})
+        });
+}
+
 exports.addActivityToPractice = async (req, res) => {
     _console.info('Attempting to create an activity for practice ' + req.params.practice);
     const {activitySpace, competencies, name} = req.body;
@@ -288,9 +323,14 @@ exports.addActivityToPractice = async (req, res) => {
                 {path: 'ownedElements.workProducts'},
                 {path: 'ownedElements.alphas', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
                 {path: 'ownedElements.activitySpaces', populate: {path: 'areaOfConcern', skipInvalidIds: true}},
-                {path: 'ownedElements.activityAssociations',
+                {
+                    path: 'ownedElements.activityAssociations',
                     populate: [
-                        {path: 'end1', skipInvalidIds: true, populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}},
+                        {
+                            path: 'end1',
+                            skipInvalidIds: true,
+                            populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}
+                        },
                         {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
                     ]
                 }
@@ -298,5 +338,50 @@ exports.addActivityToPractice = async (req, res) => {
         res.json(practice);
     } catch (e) {
         res.status(400).send({message: 'error while saving activity to practice ' + e})
+    }
+}
+
+exports.removeOwnedActivity = async (req, res) => {
+    _console.info("Activity to remove from practice ", req.params.activity)
+    const {activityAssociation} = req.body;
+    try {
+
+        await ActivityAssociation.findByIdAndDelete(req.params.activityAssociation);
+        await Activity.findByIdAndDelete(req.params.activity);
+
+        Practice.findByIdAndUpdate(req.params.practice, {
+            $pull: {
+                'ownedElements.activities': req.params.activity,
+                'ownedElements.activityAssociations': activityAssociation
+            },
+        }, {new: true}).populate([
+            {
+                path: 'ownedElements.activityAssociations',
+                populate: [
+                    {
+                        path: 'end1',
+                        skipInvalidIds: true,
+                        populate: {path: 'requiredCompetencyLevel', skipInvalidIds: true}
+                    },
+                    {path: 'end2', skipInvalidIds: true, populate: {path: 'areaOfConcern', skipInvalidIds: true}}
+                ]
+            }
+
+        ])
+            .then(response => {
+                if (response !== null) {
+                    res.send({
+                        activities: response.ownedElements.activities,
+                        activityAssociations: response.ownedElements.activityAssociations
+                    });
+                } else {
+                    res.status(404).json({errors: [`Practice not found ${req.params.practice}`]})
+                }
+            }).catch(error => {
+            _console.error(error)
+            res.status(400).json({errors: ['Error removing practice activity']});
+        });
+    } catch (e) {
+        res.status(400).send({message: 'error while removing activity to practice ' + e})
     }
 }
