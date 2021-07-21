@@ -3,6 +3,7 @@ const WorkProduct = require('../models/WorkProduct');
 const WorkProductManifest = require('../models/WorkProductManifest');
 const Practice = require('../models/Practice');
 const Activity = require('../models/Activity');
+const Pattern = require('../models/Pattern');
 const ActivityAssociation = require('../models/ActivityAssociation');
 const mongoose = require("mongoose");
 
@@ -384,4 +385,117 @@ exports.removeOwnedActivity = async (req, res) => {
     } catch (e) {
         res.status(400).send({message: 'error while removing activity to practice ' + e})
     }
+}
+
+exports.addPracticeActivitySpacePattern = async (req, res) => {
+    _console.info("Activity Space pattern to practice ", req.params.practice)
+    const {activitySpace, areaOfConcern, associationName, name, practice} = req.body;
+    Pattern.create({
+        owner: practice,
+        name,
+        target: 'activitySpace',
+        areaOfConcern,
+        associationName,
+        activitySpaceElement: activitySpace
+    })
+        .then(response => {
+            response.populate([
+                {path: 'activitySpaceElement'},
+                {path: 'areaOfConcern'}
+            ], (error, document) => {
+                if (error) {
+                    res.status(400).json({errors: [`Problems creating activitySpace pattern ${error}`]});
+                }
+                res.json(document);
+            });
+        })
+        .catch(error => {
+            _console.error(error)
+            res.status(400).json({errors: ['Error adding activity space pattern']});
+        });
+}
+
+exports.addPracticeAlphaPattern = async (req, res) => {
+    _console.info("Alpha pattern to practice ", req.params.practice)
+    const {alpha, areaOfConcern, associationName, name, practice} = req.body;
+    Pattern.create({
+        owner: practice,
+        name,
+        target: 'alpha',
+        areaOfConcern,
+        associationName,
+        alphaElement: alpha
+    })
+        .then(response => {
+            response.populate([
+                {path: 'alphaElement'},
+                {path: 'areaOfConcern'}
+            ], (error, document) => {
+                if (error) {
+                    res.status(400).json({errors: [`Problems creating alpha pattern ${error}`]});
+                }
+                res.json(document);
+            });
+        })
+        .catch(error => {
+            _console.error(error)
+            res.status(400).json({errors: ['Error adding alpha pattern']});
+        });
+}
+
+exports.addPracticeWorkProductPattern = async (req, res) => {
+    _console.info("Work product pattern to practice ", req.params.practice)
+    const {workProducts, areaOfConcern, associationName, name, practice} = req.body;
+    Pattern.create({
+        owner: practice,
+        name,
+        target: 'workProduct',
+        areaOfConcern,
+        associationName,
+        workProductElements: workProducts
+    })
+        .then(response => {
+            response.populate([
+                {path: 'workProductElements'},
+                {path: 'areaOfConcern'}
+            ], (error, document) => {
+                if (error) {
+                    res.status(400).json({errors: [`Problems creating work product pattern ${error}`]});
+                }
+                res.json(document);
+            });
+        })
+        .catch(error => {
+            _console.error(error)
+            res.status(400).json({errors: ['Error adding work product pattern']});
+        });
+}
+
+exports.getAllPracticePatterns = async (req, res) => {
+    Pattern.find({owner: req.params.practice}).populate(
+        [
+            {path: 'activitySpaceElement'},
+            {path: 'areaOfConcern'},
+            {path: 'alphaElement'},
+            {path: 'workProductElements'}
+        ]
+    ).then(response => {
+        res.send(response);
+    }).catch(error => {
+        _console.error(error)
+        res.status(400).json({errors: ['Error fetching all patters']});
+    });
+}
+
+exports.deletePracticePattern = async (req, res) => {
+    _console.info("Removing pattern practice with id", req.params.id)
+    Pattern.findByIdAndRemove(req.params.id)
+        .then((response) => {
+            res.json({
+                removed: response
+            });
+        }).catch(error => {
+        _console.error(error)
+        res.status(400).json({errors: ['Error deleting patters']});
+    });
 }

@@ -13,6 +13,7 @@ const alpha = require('./routes/alpha_routes');
 const practice = require('./routes/practice_routes');
 const activitySpace = require('./routes/activity_space_routes');
 const competency = require('./routes/competency_routes');
+const practiceValidation = require('./routes/practice_validation_routes');
 
 const server = express();
 
@@ -34,6 +35,7 @@ server.use('/alphas', alpha);
 server.use('/practices', practice);
 server.use('/activity-spaces', activitySpace);
 server.use('/competencies', competency);
+server.use('/practice-validations', practiceValidation);
 
 db.connectToDb().then(r => _console.info('then on connecting db'));
 

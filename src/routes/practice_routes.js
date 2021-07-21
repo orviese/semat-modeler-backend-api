@@ -94,4 +94,46 @@ router.delete('/:practice/activity/:activity',
     requestValidation,
     practiceControl.removeOwnedActivity);
 
+router.post('/:practice/pattern/activity-space',
+    [auth],
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    body('name', 'Pattern name  required').notEmpty(),
+    body('associationName', 'Association name  required').notEmpty(),
+    body('activitySpace', 'activitySpace id required').notEmpty(),
+    body('areaOfConcern', 'Area of concern id required').notEmpty(),
+    requestValidation,
+    practiceControl.addPracticeActivitySpacePattern);
+
+router.post('/:practice/pattern/alpha',
+    [auth],
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    body('name', 'Pattern name  required').notEmpty(),
+    body('associationName', 'Association name  required').notEmpty(),
+    body('alpha', 'Alpha id required').notEmpty(),
+    body('areaOfConcern', 'Area of concern id required').notEmpty(),
+    requestValidation,
+    practiceControl.addPracticeAlphaPattern);
+
+router.post('/:practice/pattern/work-product',
+    [auth],
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    body('name', 'Pattern name  required').notEmpty(),
+    body('associationName', 'Association name  required').notEmpty(),
+    body('workProducts', 'work products id required').notEmpty(),
+    body('areaOfConcern', 'Area of concern id required').notEmpty(),
+    requestValidation,
+    practiceControl.addPracticeWorkProductPattern);
+
+router.get('/:practice/pattern',
+    [auth],
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceControl.getAllPracticePatterns);
+
+router.delete('/pattern/:id',
+    [auth],
+    param('id', 'Pattern id required').notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceControl.deletePracticePattern);
+
 module.exports = router;
