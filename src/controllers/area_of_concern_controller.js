@@ -2,7 +2,7 @@ const _console = require('consola');
 const AreaOfConcern = require('../models/AreaOfConcern');
 
 exports.addAreaOfConcern = async (req, res) => {
-    _console.info('Attempting to create an area of concern!!');
+    _console.info('Attempting to newPracticeValidationCriterion an area of concern!!');
     try {
         const {name, description, colorConvention, order} = req.body;
         const areaOfConcernFound = await AreaOfConcern.findOne({name: name});

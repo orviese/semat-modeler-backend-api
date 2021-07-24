@@ -1,34 +1,10 @@
 const _console = require('consola');
 const PracticeValidation = require('../models/PracticeValidationCriterion');
 const PracticeValidationResult = require('../models/PracticeValidationResult');
-const WorkProductManifest = require('../models/WorkProductManifest');
-const mongoose = require("mongoose");
 const model = 'Practice Validation';
 
-exports.fetchAllValidationCriteria = async (req, res) => {
+exports.fetchAllPracticeValidationCriteria = async (req, res) => {
     PracticeValidation.find({owner: req.params.owner})
-        .then(response => {
-            res.send(response);
-        }).catch(error => {
-        _console.error(error)
-        res.status(400).json({errors: ['Error fetching all criteria']});
-    });
-}
-
-exports.fetchAllValidationCriteriaAggregated = async (req, res) => {
-    console.log('Getting details for owner' + req.params.owner);
-    PracticeValidation.aggregate()
-        .match({owner: mongoose.Types.ObjectId(req.params.owner)})
-        .unwind('$validations')
-        .project('owner name expression validations.formulaResult')
-        .group({
-            _id: {
-                criterion: '$_id', name: '$name', expression: '$expression'
-            },
-            average: {
-                $avg: '$validations.formulaResult'
-            }
-        })
         .then(response => {
             res.send(response);
         }).catch(error => {
@@ -64,7 +40,7 @@ exports.deletePracticeValidationCriterion = async (req, res) => {
         res.status(400).json({errors: ['Error adding criterion']});
     });
 }
-
+/*
 exports.deleteValidationsFromPractice = async (req, res) => {
     PracticeValidation.findByIdAndUpdate(req.params.criterion, {
         validations: []
@@ -76,7 +52,8 @@ exports.deleteValidationsFromPractice = async (req, res) => {
         res.status(400).json({errors: ['Error removing validations from criterion']});
     });
 }
-
+*/
+/*
 exports.addPracticeValidationResult = (req, res) => {
     const {criteria} = req.body;
     let criteriaUpdated = [];
@@ -98,22 +75,38 @@ exports.addPracticeValidationResult = (req, res) => {
     });
     res.status(200).send();
 }
-
-exports.createNewPublicPracticeValidation = async (req, res) => {
+*/
+exports.createPracticeValidationRequest = async (req, res) => {
     const practice = req.params.practice;
     const {criteria} = req.body
-    (await PracticeValidationResult.create({practice, criteria}))
-        .populate([{
-            path: 'practice',
-            select: 'name'
-        }])
+    PracticeValidationResult.create({practice, criteria})
         .then(response => {
-            res.send(response);
+            response.populate([{
+                path: 'practice',
+                select: 'name'
+            }], (err, doc) => {
+                if (err) {
+                    res.status(400).json({errors: ['Error adding validation to practice']});
+                } else {
+                    res.send(doc);
+                }
+            })
         })
         .catch(error => {
             _console.error(error)
             res.status(400).json({errors: ['Error adding validation to practice']});
         })
+}
+
+exports.deletePracticeValidationRequest = async (req, res) => {
+    PracticeValidationResult.findByIdAndRemove(req.params.validationRequestId)
+        .then(response => {
+            res.send(response);
+        })
+        .catch(error => {
+            _console.error(error)
+            res.status(400).json({errors: ['Error removing practice validation request']});
+    })
 }
 
 exports.getAllPracticeValidationResults = async (req, res) => {
@@ -213,11 +206,9 @@ exports.getPublicPracticeValidation = async (req, res) => {
 
 exports.closePublicPracticeValidation = async (req, res) => {
     const {personName, email, comment} = req.body;
-
-    console.log(req.body.criteria);
     PracticeValidationResult.findByIdAndUpdate(req.params.validationId, {
         personName, responseDate: Date.now(),
-        email, comment, finished: true, variables: req.body.variables
+        email, comment, finished: true, criteria: req.body.criteria
     }, {new: true})
         .populate([
             {
@@ -290,4 +281,32 @@ exports.closePublicPracticeValidation = async (req, res) => {
         _console.error(error)
         res.status(400).json({errors: ['Error closing public practice validation ' + error]});
     })
+}
+
+exports.getPublicPracticeValidationResults = async (req, res) => {
+    PracticeValidationResult.find({practice: req.params.practice, finished: true})
+        .populate([{
+            path: 'practice',
+            select: 'name'
+        }])
+        .then(response => {
+            let header = 'PRACTICE|CREATION|RESPONSE_DATE|PERSON|EMAIL|COMMENT|CRITERIA|OBJECTIVE|EXPRESSION|RESULT'
+            let rows = '';
+            if(response) {
+                response.forEach(validation => {
+                    validation.criteria.forEach(criterion => {
+                        rows += '\n';
+                        rows+=`${validation.practice.name}|${validation.creationDate}|${validation.responseDate}|${validation.personName}|${validation.email}|${validation.comment}|${criterion.name}|${criterion.objective}|${criterion.expression}|${criterion.result}`
+                    })
+                })
+            }
+                res.attachment('report.txt')
+                res.type('text')
+                res.send(header+rows)
+            }
+        )
+        .catch(error => {
+            _console.error(error)
+            res.status(400).json({errors: ['Error closing public practice validation ' + error]});
+        })
 }

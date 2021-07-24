@@ -8,7 +8,7 @@ const ActivityAssociation = require('../models/ActivityAssociation');
 const mongoose = require("mongoose");
 
 exports.addPractice = async (req, res) => {
-    _console.info('Attempting to create a practice!');
+    _console.info('Attempting to newPracticeValidationCriterion a practice!');
     try {
         const {name, objective, tags, resources, properties, measures, entry, result} = req.body;
         const practice = new Practice({name, objective, tags, resources, properties, measures, entry, result});
@@ -16,7 +16,7 @@ exports.addPractice = async (req, res) => {
         res.status(201).json(savedPractice);
         _console.success('Practice created!')
     } catch (e) {
-        _console.error('Could not create Practice', e);
+        _console.error('Could not newPracticeValidationCriterion Practice', e);
         res.status(400).json({errors: ['Problems creating your Practice']});
     }
 };
@@ -316,7 +316,7 @@ exports.removeOwnedActivitySpace = async (req, res) => {
 }
 
 exports.addActivityToPractice = async (req, res) => {
-    _console.info('Attempting to create an activity for practice ' + req.params.practice);
+    _console.info('Attempting to newPracticeValidationCriterion an activity for practice ' + req.params.practice);
     const {activitySpace, competencies, name} = req.body;
     try {
         const activity = await Activity.create({

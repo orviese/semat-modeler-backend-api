@@ -7,7 +7,7 @@ const AUTH_TOKEN_KEY = 'x-auth-token';
 
 
 exports.signUp = async (req, res) => {
-    _console.info('Attempting to create an account!!');
+    _console.info('Attempting to newPracticeValidationCriterion an account!!');
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         _console.warn('Validation problems!!')
@@ -26,7 +26,7 @@ exports.signUp = async (req, res) => {
         res.status(201).json({ id: savedAccount._id });
         _console.success('Account created!')
     } catch (e) {
-        _console.error('Could not create account', e);
+        _console.error('Could not newPracticeValidationCriterion account', e);
         res.status(400).json({errors: ['Problems creating your account']});
     }
 };

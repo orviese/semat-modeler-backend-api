@@ -9,13 +9,7 @@ router.get('/:owner',
     auth,
     param('owner', 'owner id required').notEmpty().not().contains('undefined'),
     requestValidation,
-    practiceValidationControl.fetchAllValidationCriteria
-);
-router.get('/:owner/summary',
-    auth,
-    param('owner', 'owner id required').notEmpty().not().contains('undefined'),
-    requestValidation,
-    practiceValidationControl.fetchAllValidationCriteriaAggregated
+    practiceValidationControl.fetchAllPracticeValidationCriteria
 );
 
 router.delete('/:id',
@@ -24,19 +18,27 @@ router.delete('/:id',
     requestValidation,
     practiceValidationControl.deletePracticeValidationCriterion
 );
+/*
 router.delete('/validations/:criterion',
     auth,
     param('criterion', 'Criterion id required').notEmpty().not().contains('undefined'),
     requestValidation,
     practiceValidationControl.deleteValidationsFromPractice
 );
-
+*/
 router.post('/:practice/public',
     auth,
     param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
     body('criteria', 'criteria are required').notEmpty(),
     requestValidation,
-    practiceValidationControl.createNewPublicPracticeValidation
+    practiceValidationControl.createPracticeValidationRequest
+);
+
+router.delete('/validation-request/:validationRequestId',
+    auth,
+    param('validationRequestId', 'Practice id required').notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceValidationControl.deletePracticeValidationRequest
 );
 
 router.get('/:practice/public',
@@ -45,7 +47,6 @@ router.get('/:practice/public',
     requestValidation,
     practiceValidationControl.getAllPracticeValidationResults
 );
-
 
 router.post('/',
     [
@@ -58,11 +59,12 @@ router.post('/',
         requestValidation
     ], practiceValidationControl.addPracticeValidationCriterion);
 
+/*
 router.put('/',
     [
             auth,
             body('criteria', 'Variables are required').notEmpty(),
             requestValidation
     ], practiceValidationControl.addPracticeValidationResult);
-
+*/
 module.exports = router;
