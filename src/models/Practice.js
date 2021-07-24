@@ -20,7 +20,8 @@ const practiceSchema = mongoose.Schema({
         activities: [{type: mongoose.ObjectId, ref: 'Activity'}],
         activityAssociations: [{type: mongoose.ObjectId, ref: 'ActivityAssociation'}],
         workProducts: [{type: mongoose.ObjectId, ref: "WorkProduct"}],
-        actions: []
+        workProductManifests: [{type: mongoose.ObjectId, ref: 'WorkProductManifest'}],
+        patterns: [{type: mongoose.ObjectId, ref: 'Pattern'}]
     },
     consistencyRules: String,
     objective: String,

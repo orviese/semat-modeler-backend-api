@@ -11,14 +11,42 @@ router.get('/:owner',
     requestValidation,
     practiceValidationControl.fetchAllValidationCriteria
 );
+router.get('/:owner/summary',
+    auth,
+    param('owner', 'owner id required').notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceValidationControl.fetchAllValidationCriteriaAggregated
+);
 
 router.delete('/:id',
     auth,
     param('id', 'Criterion id required').notEmpty().not().contains('undefined'),
     requestValidation,
     practiceValidationControl.deletePracticeValidationCriterion
-
 );
+router.delete('/validations/:criterion',
+    auth,
+    param('criterion', 'Criterion id required').notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceValidationControl.deleteValidationsFromPractice
+);
+
+router.post('/:practice/public',
+    auth,
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    body('criteria', 'criteria are required').notEmpty(),
+    requestValidation,
+    practiceValidationControl.createNewPublicPracticeValidation
+);
+
+router.get('/:practice/public',
+    auth,
+    param('practice', 'Practice id required').notEmpty().not().contains('undefined'),
+    requestValidation,
+    practiceValidationControl.getAllPracticeValidationResults
+);
+
+
 router.post('/',
     [
         auth,
@@ -29,5 +57,12 @@ router.post('/',
         body('variables', 'Variables are required').notEmpty(),
         requestValidation
     ], practiceValidationControl.addPracticeValidationCriterion);
+
+router.put('/',
+    [
+            auth,
+            body('criteria', 'Variables are required').notEmpty(),
+            requestValidation
+    ], practiceValidationControl.addPracticeValidationResult);
 
 module.exports = router;

@@ -217,12 +217,19 @@ exports.addWorkProductManifest = async (req, res) => {
     WorkProductManifest.create({
         owner, lowerBound, upperBound, alpha, workProduct
     }).then(response => {
-        response.populate([{path: 'alpha'}, {path: 'workProduct'}],
+        response.populate([{path: 'alpha', populate: {path: 'areaOfConcern'}}, {path: 'workProduct'}],
             (error, doc) => {
                 if (error) {
                     res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
                 }
-                res.json(response);
+                Practice.findByIdAndUpdate(owner, {
+                    $push: {'ownedElements.workProductManifests': response._id}
+                }, {new: true})
+                    .then(() => {
+                        res.json(response);
+                    }).catch(error => {
+                    res.status(400).json({errors: [`Problems updating practice work product manifest${error}`]});
+                })
             });
     }).catch(error => {
         res.status(400).json({errors: [`Problems updating practice work product ${error}`]});
@@ -246,9 +253,17 @@ exports.deleteWorkProductManifest = async (req, res) => {
         owner: req.params.practice
     }).then(() => {
         WorkProductManifest.find({owner: req.params.practice})
-            .populate([{path: 'alpha'}, {path: 'workProduct'}])
+            .populate([{path: 'alpha', populate: {path: 'areaOfConcern'}}, {path: 'workProduct'}])
             .then(response => {
-                res.json({workProductManifests: response});
+                Practice.findByIdAndUpdate(req.params.practice, {
+                    $pull: {'ownedElements.workProductManifests': req.params.id}
+                })
+                    .then(() => {
+                        res.json({workProductManifests: response});
+                    })
+                    .catch(error => {
+                        res.status(400).json({errors: [`Problems removing work product manifest ${error}`]});
+                })
             }).catch(error => {
             res.status(400).json({errors: [`Problems getting practice work product ${error}`]});
         });
@@ -399,15 +414,23 @@ exports.addPracticeActivitySpacePattern = async (req, res) => {
         activitySpaceElement: activitySpace
     })
         .then(response => {
-            response.populate([
-                {path: 'activitySpaceElement'},
-                {path: 'areaOfConcern'}
-            ], (error, document) => {
-                if (error) {
-                    res.status(400).json({errors: [`Problems creating activitySpace pattern ${error}`]});
-                }
-                res.json(document);
-            });
+            Practice.findByIdAndUpdate(practice, {
+                $push: {'ownedElements.patterns': response._id}
+            }).then(() => {
+                response.populate([
+                    {path: 'activitySpaceElement'},
+                    {path: 'areaOfConcern'}
+                ], (error, document) => {
+                    if (error) {
+                        res.status(400).json({errors: [`Problems creating activitySpace pattern ${error}`]});
+                    }
+                    res.json(document);
+                });
+            })
+                .catch(error => {
+                    _console.error(error)
+                    res.status(400).json({errors: ['Error adding owned pattern to practice']});
+                })
         })
         .catch(error => {
             _console.error(error)
@@ -427,15 +450,22 @@ exports.addPracticeAlphaPattern = async (req, res) => {
         alphaElement: alpha
     })
         .then(response => {
-            response.populate([
-                {path: 'alphaElement'},
-                {path: 'areaOfConcern'}
-            ], (error, document) => {
-                if (error) {
-                    res.status(400).json({errors: [`Problems creating alpha pattern ${error}`]});
-                }
-                res.json(document);
-            });
+            Practice.findByIdAndUpdate(practice, {
+                $push: {'ownedElements.patterns': response._id}
+            }).then(() => {
+                response.populate([
+                    {path: 'alphaElement'},
+                    {path: 'areaOfConcern'}
+                ], (error, document) => {
+                    if (error) {
+                        res.status(400).json({errors: [`Problems creating alpha pattern ${error}`]});
+                    }
+                    res.json(document);
+                });
+            }).catch(error => {
+                _console.error(error)
+                res.status(400).json({errors: ['Error adding owned pattern to practice']});
+            })
         })
         .catch(error => {
             _console.error(error)
@@ -455,14 +485,21 @@ exports.addPracticeWorkProductPattern = async (req, res) => {
         workProductElements: workProducts
     })
         .then(response => {
-            response.populate([
-                {path: 'workProductElements'},
-                {path: 'areaOfConcern'}
-            ], (error, document) => {
-                if (error) {
-                    res.status(400).json({errors: [`Problems creating work product pattern ${error}`]});
-                }
-                res.json(document);
+            Practice.findByIdAndUpdate(practice, {
+                $push: {'ownedElements.patterns': response._id}
+            }).then(() => {
+                response.populate([
+                    {path: 'workProductElements'},
+                    {path: 'areaOfConcern'}
+                ], (error, document) => {
+                    if (error) {
+                        res.status(400).json({errors: [`Problems creating work product pattern ${error}`]});
+                    }
+                    res.json(document);
+                });
+            }).catch(error => {
+                _console.error(error)
+                res.status(400).json({errors: ['Error adding owned pattern to practice']});
             });
         })
         .catch(error => {
@@ -491,9 +528,21 @@ exports.deletePracticePattern = async (req, res) => {
     _console.info("Removing pattern practice with id", req.params.id)
     Pattern.findByIdAndRemove(req.params.id)
         .then((response) => {
-            res.json({
-                removed: response
-            });
+            if (response !== null) {
+                Practice.findByIdAndUpdate(response.owner, {
+                    $pull: {'ownedElements.patterns': response._id}
+                }).then(()=>{
+                    res.json({
+                        removed: response
+                    });
+                }).catch((error)=>{
+                    res.status(400).json({errors: [`Error deleting owner pattern from practice ${error}`]});
+                });
+            }else {
+                res.json({
+                    removed: {}
+                });
+            }
         }).catch(error => {
         _console.error(error)
         res.status(400).json({errors: ['Error deleting patters']});
