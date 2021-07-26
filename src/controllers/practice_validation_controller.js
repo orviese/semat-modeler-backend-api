@@ -1,10 +1,10 @@
 const _console = require('consola');
-const PracticeValidation = require('../models/PracticeValidationCriterion');
+const PracticeValidationCriterion = require('../models/PracticeValidationCriterion');
 const PracticeValidationResult = require('../models/PracticeValidationResult');
 const model = 'Practice Validation';
 
 exports.fetchAllPracticeValidationCriteria = async (req, res) => {
-    PracticeValidation.find({owner: req.params.owner})
+    PracticeValidationCriterion.find({owner: req.params.owner})
         .then(response => {
             res.send(response);
         }).catch(error => {
@@ -22,7 +22,7 @@ exports.addPracticeValidationCriterion = async (req, res) => {
             meaning: element.meaning
         }
     });
-    PracticeValidation.create({owner, name, description, expression, variables: variablesToSave})
+    PracticeValidationCriterion.create({owner, name, description, expression, variables: variablesToSave})
         .then(response => {
             res.send(response);
         }).catch(error => {
@@ -32,7 +32,7 @@ exports.addPracticeValidationCriterion = async (req, res) => {
 }
 
 exports.deletePracticeValidationCriterion = async (req, res) => {
-    PracticeValidation.findByIdAndDelete(req.params.id)
+    PracticeValidationCriterion.findByIdAndDelete(req.params.id)
         .then(() => {
             res.send();
         }).catch(error => {

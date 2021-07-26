@@ -10,16 +10,7 @@ const practiceValidationSchema = mongoose.Schema({
         value: {type: Number, default: 1}
     }],
     expression: {type: String, trim: true},
-    result: {type: Number, default: 0},
-    validations: [{
-        creationDate: {type: Date, default: Date.now()},
-        variables: [{
-            symbol: String,
-            meaning: String,
-            value: Number
-        }],
-        formulaResult: Number
-    }]
+    result: {type: Number, default: 0}
 });
 
 module.exports = mongoose.model('PracticeValidation', practiceValidationSchema);
